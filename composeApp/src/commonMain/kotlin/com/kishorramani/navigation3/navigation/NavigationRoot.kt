@@ -1,0 +1,64 @@
+package com.kishorramani.navigation3.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import androidx.savedstate.serialization.SavedStateConfiguration
+import com.kishorramani.navigation3.screens.TodoDetailsScreen
+import com.kishorramani.navigation3.screens.TodoListScreen
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+
+@Composable
+fun NavigationRoot(
+    modifier: Modifier = Modifier
+) {
+    val backStack = rememberNavBackStack(
+        configuration = SavedStateConfiguration {
+            serializersModule = SerializersModule {
+                polymorphic(NavKey::class) {
+                    subclass(Route.TodoList::class, Route.TodoList.serializer())
+                    subclass(Route.TodoDetail::class, Route.TodoDetail.serializer())
+                }
+            }
+        },
+        Route.TodoList
+    )
+
+    NavDisplay(
+        modifier = modifier,
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = {key ->
+            when (key) {
+                is Route.TodoList -> {
+                    NavEntry(key) {
+                        TodoListScreen(
+                            onTodoClick = {
+                                backStack.add(Route.TodoDetail(it))
+                            }
+                        )
+                    }
+                }
+                is Route.TodoDetail -> {
+                    NavEntry(key) {
+                        TodoDetailsScreen(
+                            todo = key.todo
+                        )
+                    }
+                }
+                else -> error("Unknown nav key: $key")
+            }
+        }
+    )
+}
