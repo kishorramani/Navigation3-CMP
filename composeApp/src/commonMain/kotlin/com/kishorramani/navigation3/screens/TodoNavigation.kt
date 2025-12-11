@@ -1,7 +1,8 @@
-package com.kishorramani.navigation3.navigation
+package com.kishorramani.navigation3.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -9,63 +10,52 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
-import com.kishorramani.navigation3.auth.AuthNavigation
-import com.kishorramani.navigation3.screens.TodoDetailsScreen
-import com.kishorramani.navigation3.screens.TodoListScreen
-import com.kishorramani.navigation3.screens.TodoNavigation
+import com.kishorramani.navigation3.auth.LoginScreen
+import com.kishorramani.navigation3.auth.LoginViewModel
+import com.kishorramani.navigation3.auth.RegisterScreen
+import com.kishorramani.navigation3.auth.RegisterViewModel
+import com.kishorramani.navigation3.auth.SharedAuthViewModel
+import com.kishorramani.navigation3.navigation.Route
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
 @Composable
-fun NavigationRoot(
+fun TodoNavigation(
     modifier: Modifier = Modifier
 ) {
-    val rootBackStack = rememberNavBackStack(
+    val todoBackStack = rememberNavBackStack(
         configuration = SavedStateConfiguration {
             serializersModule = SerializersModule {
                 polymorphic(NavKey::class) {
-                    subclass(Route.Auth::class, Route.Auth.serializer())
-                    subclass(Route.Todo::class, Route.Todo.serializer())
+                    subclass(Route.Todo.TodoList::class, Route.Todo.TodoList.serializer())
+                    subclass(Route.Todo.TodoDetail::class, Route.Todo.TodoDetail.serializer())
                 }
             }
         },
-        Route.Auth
+        Route.Todo.TodoList
     )
 
     NavDisplay(
         modifier = modifier,
-        backStack = rootBackStack,
+        backStack = todoBackStack,
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
         ),
         entryProvider = entryProvider {
-            entry<Route.Auth> {
-                AuthNavigation(
-                    onLogin = {
-                        //on click of login button, we should remove auth screen from backstack and add todo screen to backstack
-                        rootBackStack.remove(Route.Auth)
-                        rootBackStack.add(Route.Todo)
-                    }
-                )
-            }
-
-            entry<Route.Todo> {
-                TodoNavigation()
-            }
-
-            /*entry<Route.TodoList> {
+            entry<Route.Todo.TodoList> {
                 TodoListScreen(
                     onTodoClick = {
-                        rootBackStack.add(Route.TodoDetail(it))
+                        todoBackStack.add(Route.Todo.TodoDetail(it))
                     }
                 )
             }
-            entry<Route.TodoDetail> {
+
+            entry<Route.Todo.TodoDetail> { key ->
                 TodoDetailsScreen(
-                    todo = it.todo
+                    todo = key.todo
                 )
-            }*/
+            }
         }
     )
 }

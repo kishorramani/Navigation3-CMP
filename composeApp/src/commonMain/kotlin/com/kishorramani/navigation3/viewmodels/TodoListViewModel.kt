@@ -10,4 +10,12 @@ class TodoListViewModel : ViewModel() {
     )
     val todos = _todos.asStateFlow()
 
+    init {
+        println("TodoListViewModel initialized")
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        println("TodoListViewModel cleared")
+    }
 }
