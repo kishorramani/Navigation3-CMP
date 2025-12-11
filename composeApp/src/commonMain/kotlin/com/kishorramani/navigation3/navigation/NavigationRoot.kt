@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -39,25 +40,18 @@ fun NavigationRoot(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
         ),
-        entryProvider = {key ->
-            when (key) {
-                is Route.TodoList -> {
-                    NavEntry(key) {
-                        TodoListScreen(
-                            onTodoClick = {
-                                backStack.add(Route.TodoDetail(it))
-                            }
-                        )
+        entryProvider = entryProvider {
+            entry<Route.TodoList> {
+                TodoListScreen(
+                    onTodoClick = {
+                        backStack.add(Route.TodoDetail(it))
                     }
-                }
-                is Route.TodoDetail -> {
-                    NavEntry(key) {
-                        TodoDetailsScreen(
-                            todo = key.todo
-                        )
-                    }
-                }
-                else -> error("Unknown nav key: $key")
+                )
+            }
+            entry<Route.TodoDetail> {
+                TodoDetailsScreen(
+                    todo = it.todo
+                )
             }
         }
     )
