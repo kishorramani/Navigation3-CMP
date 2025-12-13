@@ -27,10 +27,7 @@ import navigation3.composeapp.generated.resources.compose_multiplatform
 fun App() {
     MaterialTheme {
         Scaffold { innerPadding ->
-            NavigationRoot(
-                modifier = Modifier
-                    .padding(innerPadding)
-            )
+            NavigationRoot()
         }
     }
 }
